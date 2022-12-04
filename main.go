@@ -9,6 +9,20 @@ import (
 	"strings"
 )
 
+var Args *config.Config
+
+func init() {
+	Args = config.InitParams()
+	if Args.FileName == "" {
+		fmt.Println("Please input file name, use -h to get help")
+		os.Exit(0)
+	}
+	if Args.BookName == "" {
+		Args.BookName = strings.ReplaceAll(Args.FileName, ".txt", "")
+	}
+
+}
+
 func AddChapter(title string, content string) {
 	_, err := ep.AddSection(content, title, "", "")
 	if err != nil {
@@ -38,27 +52,16 @@ func SplitChapter(file []byte) {
 	var content string
 	title = "前言\n"
 	for _, line := range strings.Split(string(file), "\n") {
+		line = strings.ReplaceAll(line, "\r", "")
 		if regexp.MustCompile(Args.Rule).MatchString(line) {
-			AddChapter(title, "<h1>"+strings.ReplaceAll(title, "\r", "")+"</h1>"+content)
-			title = line
-			content = ""
+			AddChapter(title, "<h1>"+title+"</h1>"+content)
+			title = line // new title
+			content = "" // clear content
 		} else {
-			content += fmt.Sprintf("\n<p>%s</p>", strings.ReplaceAll(line, "\r", ""))
+			content += fmt.Sprintf("\n<p>%s</p>", line)
 		}
 	} //end for
 	fmt.Println("Done")
-}
-
-var Args *config.Config
-
-func init() {
-	Args = config.InitParams()
-	if Args.FileName == "" {
-		fmt.Println("Please input file name")
-		os.Exit(0)
-	}
-	Args.BookName = strings.ReplaceAll(Args.FileName, ".txt", "")
-
 }
 
 func main() {
