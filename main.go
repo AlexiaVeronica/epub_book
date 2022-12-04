@@ -5,6 +5,7 @@ import (
 	"epubset/pkg/go-epub"
 	"fmt"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 )
@@ -41,7 +42,11 @@ func SetBookInfo(Author, Cover, Description string) {
 	ep.SetCover(Cover, "")
 }
 func Save() {
-	err := ep.Write(Args.BookName + ".epub")
+	// 判断文件夹是否存在
+	if _, err := os.Stat("output"); os.IsNotExist(err) {
+		os.Mkdir("output", os.ModePerm)
+	}
+	err := ep.Write(path.Join("output", Args.BookName+".epub"))
 	if err != nil {
 		fmt.Println("Save error", err)
 	}
@@ -61,7 +66,7 @@ func SplitChapter(file []byte) {
 			content += fmt.Sprintf("\n<p>%s</p>", line)
 		}
 	} //end for
-	fmt.Println("Done")
+	fmt.Println(Args.BookName, "done")
 }
 
 func main() {
