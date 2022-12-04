@@ -2,6 +2,7 @@ package main
 
 import (
 	"epubset/go-epub"
+	"flag"
 	"fmt"
 	"os"
 	"regexp"
@@ -19,10 +20,9 @@ func AddChapter(title string, content string) {
 var ep *epub.Epub
 var book_name string
 
-func SetBookInfo(Author, Cover, Description, Title string) {
+func SetBookInfo(Author, Cover, Description string) {
 	ep.SetLang("zh")
 	ep.SetAuthor(Author)
-	ep.SetTitle(Title)
 	ep.SetDescription(Description)
 	ep.SetCover(Cover, "")
 }
@@ -33,29 +33,12 @@ func Save() {
 	}
 }
 
-const DefaultMatchTips = "^第[0-9一二三四五六七八九十零〇百千两 ]+[章回节集卷]|^[Ss]ection.{1,20}$|^[Cc]hapter.{1,20}$|^[Pp]age.{1,20}$|^\\d{1,4}$|^引子$|^楔子$|^章节目录|^章节|^序章"
-
-func main() {
-	// Create a new EPUB
-	file_name := "DIO异闻录.txt"
-	book_name = strings.Replace(file_name, ".txt", "", -1)
-	ep = epub.NewEpub("My title")
-	SetBookInfo("Author", "cover.jpg", "Description", "Title")
-	file, _ := os.ReadFile(file_name)
-	//fmt.Println(string(file))
-
-	reg, err := regexp.Compile(DefaultMatchTips)
-	if err != nil {
-		fmt.Println("regexp error", err)
-	} else {
-		fmt.Println("regexp ok")
-
-	}
+func SplitChapter(file []byte) {
 	var title string
 	var content string
-	title = "前言"
+	title = "前言\n"
 	for _, line := range strings.Split(string(file), "\n") {
-		if reg.MatchString(line) {
+		if regexp.MustCompile(MatchTips).MatchString(line) {
 			AddChapter(title, "<h1>"+strings.ReplaceAll(title, "\r", "")+"</h1>"+content)
 			title = line
 			content = ""
@@ -63,5 +46,29 @@ func main() {
 			content += fmt.Sprintf("\n<p>%s</p>", strings.ReplaceAll(line, "\r", ""))
 		}
 	} //end for
-	Save()
+	fmt.Println("Done")
+}
+
+const MatchTips = "^第[0-9一二三四五六七八九十零〇百千两 ]+[章回节集卷]|^[Ss]ection.{1,20}$|^[Cc]hapter.{1,20}$|^[Pp]age.{1,20}$|^\\d{1,4}$|^引子$|^楔子$|^章节目录|^章节|^序章"
+
+// var b = flag.Bool("b", false, "bool类型参数")
+var file_name = flag.String("n", "", "string类型参数")
+
+func main() {
+	flag.Parse()
+	if *file_name == "" {
+		fmt.Println("Usage: -n book_name")
+		return
+	}
+	book_name = strings.Replace(*file_name, ".txt", "", -1)
+	ep = epub.NewEpub(book_name) // Create a new EPUB
+	SetBookInfo("Author", "cover.jpg", "Description")
+	file, err := os.ReadFile(*file_name)
+	if err != nil {
+		fmt.Println("ReadFile error", err)
+		return
+	} else {
+		SplitChapter(file)
+		Save()
+	}
 }
