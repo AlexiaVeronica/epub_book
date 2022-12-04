@@ -195,7 +195,7 @@ func (t *toc) addSubSection(parent string, index int, title string, relativePath
 			Data: title,
 		},
 	}
-	if len(t.navXML.Links) > parentNavIndex  {
+	if len(t.navXML.Links) > parentNavIndex {
 		// Create a new array if none exists
 		if t.navXML.Links[parentNavIndex].Children == nil {
 			n := make([]tocNavItem, 0)

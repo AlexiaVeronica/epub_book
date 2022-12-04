@@ -21,7 +21,6 @@ Basic usage:
 	if err != nil {
 		// handle error
 	}
-
 */
 package epub
 

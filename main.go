@@ -12,6 +12,7 @@ import (
 func AddChapter(title string, content string) {
 	_, err := ep.AddSection(content, title, "", "")
 	if err != nil {
+		fmt.Println("AddSection error", err)
 		return
 	}
 	//println(section) // section0002.xhtml
