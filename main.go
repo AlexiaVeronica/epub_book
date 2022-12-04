@@ -3,9 +3,8 @@ package main
 import (
 	"epubset/pkg/config"
 	"epubset/pkg/go-epub"
+	"epubset/pkg/image"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path"
 	"regexp"
@@ -48,47 +47,17 @@ func SetBookInfo(Author, Cover, Description string) *EpubConfig {
 }
 func (ep *EpubConfig) DownloaderCover(CoverUrl string, Cover bool) {
 	CreateFile("cover")
-	resp, err := http.Get(CoverUrl)
-	if err != nil {
-		fmt.Println("Download error", err)
-		return
-	}
-
-	defer func(Body io.ReadCloser) {
-		err = Body.Close()
-		if err != nil {
-			fmt.Println("Close error", err)
-		}
-	}(resp.Body)
-
-	content, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Printf("Read http response failed! %v", err)
-		return
-	}
-	if content != nil {
-		var coverName string
-		if strings.Contains(path.Base(CoverUrl), ".jpg") {
-			coverName = path.Join("cover", path.Base(CoverUrl))
-		} else {
-			coverName = path.Join("cover", path.Base(CoverUrl)+".jpg")
-		}
-		if err = os.WriteFile(coverName, content, 0666); err != nil {
-			fmt.Println("WriteFile error", err)
-		}
-		image, ok := ep.epub.AddImage(coverName, "cover.jpg")
-		if ok != nil {
-			fmt.Println("AddImage error", ok)
-		} else {
-			fmt.Println("===>", image, "added")
-			if Cover {
-				ep.epub.SetCover(image, "")
-			} else {
-				ep.epub.AddSection("<img src=\""+image+"\"/>", "插画", "", "")
-			}
-		}
+	coverName := image.DownloaderCover(CoverUrl)
+	FilePath, ok := ep.epub.AddImage(coverName, "cover.jpg")
+	if ok != nil {
+		fmt.Println("AddImage error", ok)
 	} else {
-
+		fmt.Println("===>", FilePath, "added")
+		if Cover {
+			ep.epub.SetCover(FilePath, "")
+		} else {
+			ep.epub.AddSection("<img src=\""+FilePath+"\"/>", "插画", "", "")
+		}
 	}
 }
 
