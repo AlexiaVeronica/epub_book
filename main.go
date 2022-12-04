@@ -1,8 +1,8 @@
 package main
 
 import (
-	"epubset/go-epub"
-	"flag"
+	"epubset/pkg/config"
+	"epubset/pkg/go-epub"
 	"fmt"
 	"os"
 	"regexp"
@@ -18,7 +18,6 @@ func AddChapter(title string, content string) {
 }
 
 var ep *epub.Epub
-var book_name string
 
 func SetBookInfo(Author, Cover, Description string) {
 	ep.SetLang("zh")
@@ -27,7 +26,7 @@ func SetBookInfo(Author, Cover, Description string) {
 	ep.SetCover(Cover, "")
 }
 func Save() {
-	err := ep.Write(book_name + ".epub")
+	err := ep.Write(Args.BookName + ".epub")
 	if err != nil {
 		fmt.Println("Save error", err)
 	}
@@ -38,7 +37,7 @@ func SplitChapter(file []byte) {
 	var content string
 	title = "前言\n"
 	for _, line := range strings.Split(string(file), "\n") {
-		if regexp.MustCompile(MatchTips).MatchString(line) {
+		if regexp.MustCompile(Args.Rule).MatchString(line) {
 			AddChapter(title, "<h1>"+strings.ReplaceAll(title, "\r", "")+"</h1>"+content)
 			title = line
 			content = ""
@@ -49,24 +48,23 @@ func SplitChapter(file []byte) {
 	fmt.Println("Done")
 }
 
-const MatchTips = "^第[0-9一二三四五六七八九十零〇百千两 ]+[章回节集卷]|^[Ss]ection.{1,20}$|^[Cc]hapter.{1,20}$|^[Pp]age.{1,20}$|^\\d{1,4}$|^引子$|^楔子$|^章节目录|^章节|^序章"
+var Args *config.Config
 
-// var b = flag.Bool("b", false, "bool类型参数")
-var file_name = flag.String("n", "", "string类型参数")
+func init() {
+	Args = config.InitParams()
+	if Args.FileName == "" {
+		fmt.Println("Please input file name")
+		os.Exit(0)
+	}
+	Args.BookName = strings.ReplaceAll(Args.FileName, ".txt", "")
+
+}
 
 func main() {
-	flag.Parse()
-	if *file_name == "" {
-		fmt.Println("Usage: -n book_name")
-		return
-	}
-	book_name = strings.Replace(*file_name, ".txt", "", -1)
-	ep = epub.NewEpub(book_name) // Create a new EPUB
-	SetBookInfo("Author", "cover.jpg", "Description")
-	file, err := os.ReadFile(*file_name)
-	if err != nil {
+	ep = epub.NewEpub(Args.BookName) // Create a new EPUB
+	SetBookInfo(Args.Author, Args.Cover, Args.Description)
+	if file, err := os.ReadFile(Args.FileName); err != nil {
 		fmt.Println("ReadFile error", err)
-		return
 	} else {
 		SplitChapter(file)
 		Save()

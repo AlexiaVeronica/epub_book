@@ -3,11 +3,10 @@
 package osfs
 
 import (
+	"epubset/pkg/go-epub/internal/storage"
 	"io/fs"
 	"os"
 	"path/filepath"
-
-	"epubset/go-epub/internal/storage"
 )
 
 type OSFS struct {

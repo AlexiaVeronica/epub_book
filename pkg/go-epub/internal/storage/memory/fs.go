@@ -1,12 +1,11 @@
 package memory
 
 import (
+	"epubset/pkg/go-epub/internal/storage"
 	"io/fs"
 	"path"
 	"strings"
 	"time"
-
-	"epubset/go-epub/internal/storage"
 )
 
 type Memory struct {

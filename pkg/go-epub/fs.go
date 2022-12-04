@@ -1,11 +1,10 @@
 package epub
 
 import (
+	"epubset/pkg/go-epub/internal/storage"
+	"epubset/pkg/go-epub/internal/storage/memory"
+	"epubset/pkg/go-epub/internal/storage/osfs"
 	"os"
-
-	"epubset/go-epub/internal/storage"
-	"epubset/go-epub/internal/storage/memory"
-	"epubset/go-epub/internal/storage/osfs"
 )
 
 type FSType int
