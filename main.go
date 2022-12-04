@@ -44,7 +44,10 @@ func SetBookInfo(Author, Cover, Description string) {
 func Save() {
 	// 判断文件夹是否存在
 	if _, err := os.Stat("output"); os.IsNotExist(err) {
-		os.Mkdir("output", os.ModePerm)
+		if err = os.Mkdir("output", os.ModePerm); err != nil {
+			fmt.Println("Mkdir error", err)
+			return
+		}
 	}
 	err := ep.Write(path.Join("output", Args.BookName+".epub"))
 	if err != nil {
@@ -66,7 +69,7 @@ func SplitChapter(file []byte) {
 			content += fmt.Sprintf("\n<p>%s</p>", line)
 		}
 	} //end for
-	fmt.Println(Args.BookName, "done")
+	fmt.Println(Args.BookName, "done") // last chapter
 }
 
 func main() {
