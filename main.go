@@ -37,9 +37,11 @@ const DefaultMatchTips = "^第[0-9一二三四五六七八九十零〇百千两 
 
 func main() {
 	// Create a new EPUB
+	file_name := "DIO异闻录.txt"
+	book_name = strings.Replace(file_name, ".txt", "", -1)
 	ep = epub.NewEpub("My title")
 	SetBookInfo("Author", "cover.jpg", "Description", "Title")
-	file, _ := os.ReadFile("DIO异闻录.txt")
+	file, _ := os.ReadFile(file_name)
 	//fmt.Println(string(file))
 
 	reg, err := regexp.Compile(DefaultMatchTips)
@@ -49,7 +51,6 @@ func main() {
 		fmt.Println("regexp ok")
 
 	}
-	book_name = "DIO异闻录c"
 	var title string
 	var content string
 	title = "前言"
