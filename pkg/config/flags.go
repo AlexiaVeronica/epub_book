@@ -10,6 +10,7 @@ var cover = flag.String("c", "", "cover image")
 var description = flag.String("d", "", "description")
 var bookName = flag.String("n", "", "book name")
 var rule = flag.String("r", MatchTips, "rule")
+var saveDir = flag.String("o", "", "output dir")
 
 type Config struct {
 	FileName    string
@@ -18,6 +19,7 @@ type Config struct {
 	Description string
 	Rule        string
 	BookName    string
+	SaveDir     string
 }
 
 func InitParams() *Config {
@@ -29,5 +31,6 @@ func InitParams() *Config {
 		Description: *description,
 		Rule:        *rule,
 		BookName:    *bookName,
+		SaveDir:     *saveDir,
 	}
 }
