@@ -58,20 +58,21 @@ func SetBookInfo(Author, Cover, Description string) *EpubConfig {
 	if Cover != "" {
 		Epub.DownloaderCover(Cover, true)
 	} else {
-		Epub.epub.SetCover("cover/cover.jpg", "")
+		Epub.epub.AddImage("cover/cover.jpg", "cover.jpg")
+		Epub.epub.SetCover("../images/cover.jpg", "")
 	}
 	return Epub
 }
 
 func (ep *EpubConfig) DownloaderCover(CoverUrl string, Cover bool) {
 	coverName := image.DownloaderCover(CoverUrl)
-	FilePath, ok := ep.epub.AddImage(coverName, "cover.jpg")
+	FilePath, ok := ep.epub.AddImage(coverName, path.Base(coverName))
 	if ok != nil {
 		fmt.Println("AddImage error", ok)
 	} else {
 		fmt.Println("===>", FilePath, "added")
 		if Cover {
-			ep.epub.SetCover(FilePath, "")
+			ep.epub.SetCover("../images/"+FilePath, "")
 		} else {
 			ep.AddChapter("封面", fmt.Sprintf(`<img src="%s" />`, FilePath))
 		}
