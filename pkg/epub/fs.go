@@ -1,9 +1,9 @@
 package epub
 
 import (
-	"epubset/pkg/go-epub/internal/storage"
-	"epubset/pkg/go-epub/internal/storage/memory"
-	"epubset/pkg/go-epub/internal/storage/osfs"
+	"epubset/pkg/epub/internal/storage"
+	"epubset/pkg/epub/internal/storage/memory"
+	"epubset/pkg/epub/internal/storage/osfs"
 	"os"
 )
 

@@ -3,7 +3,7 @@
 package osfs
 
 import (
-	"epubset/pkg/go-epub/internal/storage"
+	"epubset/pkg/epub/internal/storage"
 	"io/fs"
 	"os"
 	"path/filepath"

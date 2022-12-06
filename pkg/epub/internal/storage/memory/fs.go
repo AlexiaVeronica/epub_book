@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"epubset/pkg/go-epub/internal/storage"
+	"epubset/pkg/epub/internal/storage"
 	"io/fs"
 	"path"
 	"strings"

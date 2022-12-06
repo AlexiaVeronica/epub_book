@@ -2,7 +2,7 @@ package main
 
 import (
 	"epubset/pkg/config"
-	"epubset/pkg/go-epub"
+	"epubset/pkg/epub"
 	"epubset/pkg/image"
 	"fmt"
 	"os"
@@ -56,7 +56,7 @@ func (ep *EpubConfig) DownloaderCover(CoverUrl string, Cover bool) {
 		if Cover {
 			ep.epub.SetCover(FilePath, "")
 		} else {
-			ep.epub.AddSection("<img src=\""+FilePath+"\"/>", "插画", "", "")
+			ep.AddChapter("封面", fmt.Sprintf("<img src=\"%s\"/>", FilePath))
 		}
 	}
 }
