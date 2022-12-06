@@ -38,14 +38,28 @@ func SetBookInfo(Author, Cover, Description string) *EpubConfig {
 	if Args.SaveDir != "" {
 		Epub.saveDir = Args.SaveDir
 	}
-
+	// Create a new epub file
 	file.CreateFile(Epub.saveDir)
+	// Create a new image directory
 	file.CreateFile("cover")
-	Epub.savePath = path.Join(Epub.saveDir, Args.BookName+".epub") // Set the output file path
+	// Set the output file path
+	Epub.savePath = path.Join(Epub.saveDir, Args.BookName+".epub")
 	Epub.epub.SetLang("zh")
-	Epub.epub.SetAuthor(Author)
-	Epub.epub.SetDescription(Description)
-	Epub.epub.SetCover(Cover, "")
+	if Author != "" {
+		Epub.epub.SetAuthor(Author)
+	} else {
+		Epub.epub.SetAuthor("侠名")
+	}
+	if Description != "" {
+		Epub.epub.SetDescription(Description)
+	} else {
+		Epub.epub.SetDescription("简介信息为空")
+	}
+	if Cover != "" {
+		Epub.DownloaderCover(Cover, true)
+	} else {
+		Epub.epub.SetCover("cover/cover.jpg", "")
+	}
 	return Epub
 }
 
@@ -103,10 +117,6 @@ func main() {
 	if fileByte, err := os.ReadFile(Args.FileName); err != nil {
 		fmt.Println("ReadFile error", err)
 	} else {
-		if Args.Cover != "" {
-			Epub.DownloaderCover(Args.Cover, true)
-			fmt.Println("===>", Args.Cover, "downloaded")
-		}
 		Epub.SplitChapter(fileByte)
 		Epub.Save(2)
 	}
