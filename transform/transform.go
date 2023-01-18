@@ -1,4 +1,4 @@
-package dict
+package transform
 
 import "fmt"
 
@@ -22,12 +22,12 @@ func Transform(str string, original string, transformString string) string {
 	return new_str
 }
 
-// ZhTransform 简体转繁体
-func ZhTransform(str string) string {
+// ZhTransformTw ZhTransform 简体转繁体
+func ZhTransformTw(str string) string {
 	return Transform(str, ZH_CH_STRING, TW_CH_STRING)
 }
 
 // TwTransform 繁体转简体
-func TwTransform(str string) string {
+func TwTransformZh(str string) string {
 	return Transform(str, TW_CH_STRING, ZH_CH_STRING)
 }

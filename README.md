@@ -4,16 +4,21 @@
 
 ```bash
 go run main.go -h
-  -a string
+  -author string
         author name
-  -c string
+  -cover string
         cover image
-  -d string
-        description
-  -f string
-        file_name
-  -n string
-        book name
+  -file string
+        Input file name (required)
+  -intro string
+        description information
+  -o string
+        output dir
   -r string
         rule (default "^第[0-9一二三四五六七八九十零〇百千两 ]+[章回节集卷]|^[Ss]ection.{1,20}$|^[Cc]hapter.{1,20}$|^[Pp]age.{1,20}$|^\\d{1,4}$|^引子$|^楔子$|^ 章节目录|^章节|^序章")
+  -tw
+        Transform to traditional Chinese
+  -zh
+        Transform to simplified Chinese
+  
 ```

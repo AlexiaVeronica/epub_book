@@ -5,7 +5,9 @@ import (
 	"epubset/pkg/epub"
 	"epubset/pkg/file"
 	"epubset/pkg/image"
+	"epubset/transform"
 	"fmt"
+	"github.com/schollz/progressbar/v3"
 	"os"
 	"path"
 	"regexp"
@@ -20,10 +22,7 @@ func init() {
 		fmt.Println("Please input file name, use -h to get help")
 		os.Exit(0)
 	}
-	if Args.BookName == "" {
-		Args.BookName = strings.ReplaceAll(Args.FileName, ".txt", "")
-	}
-
+	Args.BookName = strings.ReplaceAll(Args.FileName, ".txt", "")
 }
 
 type EpubConfig struct {
@@ -99,10 +98,20 @@ func (ep *EpubConfig) Save(max_retry int) {
 func (ep *EpubConfig) SplitChapter(fileByte []byte) {
 	var title string
 	var content string
+	ContentList := strings.Split(string(fileByte), "\n")
+	bar := progressbar.Default(int64(len(ContentList)))
 	title = "前言\n"
-	for _, line := range strings.Split(string(fileByte), "\n") {
+	for _, line := range ContentList {
+		bar.Add(1)
 		line = strings.ReplaceAll(line, "\r", "")
 		if regexp.MustCompile(Args.Rule).MatchString(line) {
+			if Args.TransformTW {
+				title = transform.ZhTransformTw(line)
+				content = transform.ZhTransformTw(content)
+			} else if Args.TransformZh {
+				title = transform.TwTransformZh(line)
+				content = transform.TwTransformZh(content)
+			}
 			ep.AddChapter(title, "<h1>"+title+"</h1>"+content) // 添加章节
 			title = line                                       // new title
 			content = ""                                       // clear content
