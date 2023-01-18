@@ -12,6 +12,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var Args *config.Config
@@ -99,7 +100,7 @@ func (ep *EpubConfig) SplitChapter(fileByte []byte) {
 	var title string
 	var content string
 	ContentList := strings.Split(string(fileByte), "\n")
-	bar := progressbar.Default(int64(len(ContentList)))
+	bar := progressbar.Default(int64(len(ContentList)), Args.BookName)
 	title = "前言\n"
 	for _, line := range ContentList {
 		bar.Add(1)
@@ -122,6 +123,10 @@ func (ep *EpubConfig) SplitChapter(fileByte []byte) {
 	fmt.Println(Args.BookName, "done") // last chapter
 }
 func main() {
+	// 统计耗时
+	defer func(start time.Time) {
+		fmt.Println("耗时：", time.Since(start))
+	}(time.Now())
 	Epub := SetBookInfo(Args.Author, Args.Cover, Args.Description)
 	if fileByte, err := os.ReadFile(Args.FileName); err != nil {
 		fmt.Println("ReadFile error", err)
