@@ -112,7 +112,6 @@ func (ep *EpubConfig) SplitChapter(fileByte []byte) {
 	} //end for
 	fmt.Println(Args.BookName, "done") // last chapter
 }
-
 func main() {
 	Epub := SetBookInfo(Args.Author, Args.Cover, Args.Description)
 	if fileByte, err := os.ReadFile(Args.FileName); err != nil {
@@ -121,5 +120,4 @@ func main() {
 		Epub.SplitChapter(fileByte)
 		Epub.Save(2)
 	}
-
 }
