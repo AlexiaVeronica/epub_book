@@ -9,36 +9,37 @@ import (
 	"strings"
 )
 
-func DownloaderCover(CoverUrl string) string {
-	var imageFile []byte
-	if resp, err := http.Get(CoverUrl); err != nil {
-		fmt.Println("Download error", err)
-		imageFile = nil
-	} else {
-		defer func(Body io.ReadCloser) {
-			if err = Body.Close(); err != nil {
-				fmt.Println("Close error", err)
-			}
-		}(resp.Body)
-		if imageFile, err = io.ReadAll(resp.Body); err != nil {
-			fmt.Printf("Read http response failed! %v", err)
-			imageFile = nil
-		}
+func DownloaderCover(CoverUrl string, CoverName string) string {
+	if CoverName == "" {
+		CoverName = path.Base(CoverUrl)
 	}
+	CoverName = path.Join("cover", CoverName)
+	if !strings.Contains(CoverName, ".jpg") {
+		CoverName = CoverName + ".jpg"
+	}
+	// 判断图片是否存在
+	_, exist := os.Stat(CoverName)
+	if exist == nil {
+		return CoverName
+	}
+	resp, err := http.Get(CoverUrl)
+	if err != nil {
+		fmt.Println("Download error", err)
+		return ""
+	}
+	defer func(Body io.ReadCloser) {
+		if err = Body.Close(); err != nil {
+			fmt.Println("Close error", err)
+		}
+	}(resp.Body)
 
-	if imageFile != nil {
-		var coverName string
-		if strings.Contains(path.Base(CoverUrl), ".jpg") {
-			coverName = path.Join("cover", path.Base(CoverUrl))
-		} else {
-			coverName = path.Join("cover", path.Base(CoverUrl)+".jpg")
-		}
-		if err := os.WriteFile(coverName, imageFile, 0666); err != nil {
-			fmt.Println("WriteFile error", err)
-		}
-		return coverName
+	if imageFile, err := io.ReadAll(resp.Body); err != nil {
+		fmt.Printf("Read http response failed! %v", err)
 	} else {
-		fmt.Println("download cover failed: ", CoverUrl)
+		if ok := os.WriteFile(CoverName, imageFile, 0666); ok != nil {
+			fmt.Println("WriteFile error", ok)
+		}
+		return CoverName
 	}
 	return ""
 }

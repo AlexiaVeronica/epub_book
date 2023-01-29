@@ -12,7 +12,6 @@ import (
 	"path"
 	"regexp"
 	"strings"
-	"time"
 )
 
 var Args *config.Config
@@ -23,7 +22,8 @@ func init() {
 		fmt.Println("Please input file name, use -h to get help")
 		os.Exit(0)
 	}
-	Args.BookName = strings.ReplaceAll(Args.FileName, ".txt", "")
+	// 获取路径会后一个地址
+	Args.BookName = strings.ReplaceAll(path.Base(Args.FileName), ".txt", "")
 }
 
 type EpubConfig struct {
@@ -39,7 +39,12 @@ func SetBookInfo(Author, Cover, Description string) *EpubConfig {
 		Epub.saveDir = Args.SaveDir
 	}
 	// Create a new epub file
-	file.CreateFile(Epub.saveDir)
+	// 判断文件夹是否存在
+	//os.Stat(Epub.saveDir)
+	_, err := os.Stat(Epub.saveDir)
+	if !os.IsExist(err) {
+		file.CreateFile(Epub.saveDir)
+	}
 	// Create a new image directory
 	file.CreateFile("cover")
 	// Set the output file path
@@ -65,17 +70,21 @@ func SetBookInfo(Author, Cover, Description string) *EpubConfig {
 }
 
 func (ep *EpubConfig) DownloaderCover(CoverUrl string, Cover bool) {
-	coverName := image.DownloaderCover(CoverUrl)
-	FilePath, ok := ep.epub.AddImage(coverName, path.Base(coverName))
-	if ok != nil {
-		fmt.Println("AddImage error", ok)
-	} else {
-		fmt.Println("===>", FilePath, "added")
-		if Cover {
-			ep.epub.SetCover("../images/"+FilePath, "")
+	coverName := image.DownloaderCover(CoverUrl, Args.CoverName)
+	if coverName != "" {
+		FilePath, ok := ep.epub.AddImage(coverName, path.Base(coverName))
+
+		if ok != nil {
+			fmt.Println("AddImage error", ok)
 		} else {
-			ep.AddChapter("封面", fmt.Sprintf(`<img src="%s" />`, FilePath))
+			if Cover {
+				ep.epub.SetCover("../images/"+FilePath, "")
+			} else {
+				ep.AddChapter("封面", fmt.Sprintf(`<img src="%s" />`, FilePath))
+			}
 		}
+	} else {
+		fmt.Println("Downloader Cover error")
 	}
 }
 
@@ -99,11 +108,17 @@ func (ep *EpubConfig) Save(max_retry int) {
 func (ep *EpubConfig) SplitChapter(fileByte []byte) {
 	var title string
 	var content string
+	var bar *progressbar.ProgressBar
+
 	ContentList := strings.Split(string(fileByte), "\n")
-	bar := progressbar.Default(int64(len(ContentList)), Args.BookName)
+	if Args.ShowProgress {
+		bar = progressbar.Default(int64(len(ContentList)), Args.BookName)
+	}
 	title = "前言\n"
 	for _, line := range ContentList {
-		bar.Add(1)
+		if Args.ShowProgress {
+			bar.Add(1)
+		}
 		line = strings.ReplaceAll(line, "\r", "")
 		if regexp.MustCompile(Args.Rule).MatchString(line) {
 			if Args.TransformTW {
@@ -120,18 +135,19 @@ func (ep *EpubConfig) SplitChapter(fileByte []byte) {
 			content += fmt.Sprintf("\n<p>%s</p>", line)
 		}
 	} //end for
-	fmt.Println(Args.BookName, "done") // last chapter
+	//fmt.Println(Args.BookName, "done") // last chapter
 }
 func main() {
 	// 统计耗时
-	defer func(start time.Time) {
-		fmt.Println("耗时：", time.Since(start))
-	}(time.Now())
+	//defer func(start time.Time) {
+	//	fmt.Println("耗时：", time.Since(start))
+	//}(time.Now())
 	Epub := SetBookInfo(Args.Author, Args.Cover, Args.Description)
 	if fileByte, err := os.ReadFile(Args.FileName); err != nil {
 		fmt.Println("ReadFile error", err)
 	} else {
 		Epub.SplitChapter(fileByte)
 		Epub.Save(2)
+
 	}
 }
